@@ -2,6 +2,7 @@
 using System.Numerics;
 using UnityEngine;
 using static System.Runtime.CompilerServices.RuntimeHelpers;
+using System.Collections.Generic;
 
 namespace Asino
 {
@@ -10,6 +11,7 @@ namespace Asino
         public float speed = 5f;
         public bool joined = true;
         public int gap = 3;
+        Dictionary<GameObject, Vector3> originalPositions = new Dictionary<GameObject, Vector3>();
 
         public Transform leftContainer;
         public Transform rightContainer;
@@ -24,7 +26,13 @@ namespace Asino
             combined = fillContainer(leftContainer)
                 .Concat(fillContainer(rightContainer))
                 .ToArray();
+
+            foreach (var obj in combined)
+            {
+                originalPositions[obj] = obj.transform.position;
+            }
         }
+
 
         void Update()
         {
