@@ -14,6 +14,7 @@ using Unity.VisualScripting;
 using UnityEngine.InputSystem;
 using System.Runtime.CompilerServices;
 using UnityEngine.UI;
+using TMPro;
 
 namespace Asino
 {
@@ -24,6 +25,10 @@ namespace Asino
         public bool joined = true;
         public int gap = 3;
         public Transform directionRing;
+        [SerializeField] CurvedAimLine curveLine;
+        [SerializeField] TMP_Text bubiText;
+        [SerializeField] ParticleSystem csihiPuhi;
+
         Transform crowd;
         Vector3 movement = Vector3.zero;
         public healthbar healthBar;
@@ -60,35 +65,70 @@ namespace Asino
         public Image ring;
         public Image cricle;
 
+        public SettingsScript settings;
+
+
+        private float nextInputTime = 0f;
+        public float inputDelay = 0.2f;
+
+        [SerializeField] private AudioClip audioClip;
+
+        public void OnEscape(InputValue v)
+        {
+            if (v.isPressed)
+            {
+                if (playerInput.playerIndex != 0) return;
+                SettingsScript.Instance.OpenSettings();
+            }
+        }
+
+    public void OnNavigate(InputValue value)
+    {
+
+        if (playerInput.playerIndex != 0) return;
+        if (Time.unscaledTime < nextInputTime) return;
+
+        Vector2 dir = value.Get<Vector2>();
+
+        if (dir.y > 0.5f)
+        {
+            SettingsScript.Instance.rounds++;
+            nextInputTime = Time.unscaledTime + inputDelay;
+        }
+        else if (dir.y < -0.5f)
+        {
+            SettingsScript.Instance.rounds--;
+            nextInputTime = Time.unscaledTime + inputDelay;
+        }
+    }
+
+
 
         void Awake()
         {
             playerNumber = playerInput.playerIndex + 1;
 
-                if (healthBar == null){
+            if (healthBar == null){
             var bars = FindObjectsByType<healthbar>(FindObjectsSortMode.None);
 
             foreach (var bar in bars)
             {
-  
-                var hbController = bar.GetComponent<PlayerInput>();
-                if (hbController != null && hbController.playerIndex == playerInput.playerIndex)
+                
+                if (bar != null &&bar.playerIndex-1 == playerInput.playerIndex)
                 {
                     healthBar = bar;
                     break;
                 }
             }
             LoadColors();
-                if (playerNumber ==1)
-                {
-                    transform.position -= new Vector3(-20f, 9,0);
-                }
-                else
-                {
-                    transform.position -= new Vector3(20f,9,0);
-                }
-            
-
+            if (playerNumber ==1)
+            {
+                transform.position -= new Vector3(-20f, 9,0);
+            }
+            else
+            {
+                transform.position -= new Vector3(20f,9,0);
+            }
     }
 
 }
@@ -99,6 +139,7 @@ namespace Asino
             : new Color32(230, 60, 60, 255);
             cricle.color = teamColor;
             ring.color = teamColor;
+            bubiText.color = teamColor;
 
         }
 
@@ -165,7 +206,10 @@ namespace Asino
         void Update()
         {
             UpdateHealthbar();
-
+            if (!actionTimer.isRunning)
+            {
+                curveLine.canEmmit = false;
+            }
 
         }
 
@@ -187,6 +231,7 @@ namespace Asino
             actionTimer.StopTimer();
             actionTimer.duration = 5f;
             textBubi.AppearBubi("GRAB!!!");
+            curveLine.canEmmit = true;
             foreach (GameObject member in crowdMember)
             {
                 if (member == null) continue;
@@ -209,6 +254,7 @@ namespace Asino
                 return;
             actionTimer.duration = 3f;
             textBubi.AppearBubi("ATTACK!!!");
+            csihiPuhi.Play();
             foreach (GameObject member in crowdMember)
             {
                 if (member == null)
@@ -220,7 +266,7 @@ namespace Asino
                     script.hit();
                 }
             }
-            
+            SoundFXManager.instance.PlaySoundFXClip(audioClip,transform, 10f);
             startActionTimer();
         }
         void startActionTimer()

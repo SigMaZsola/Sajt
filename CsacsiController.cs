@@ -17,6 +17,8 @@ private Vector3 targetPosition;
     private Vector3 hitPoint;
 
     public Animator animator;
+    public Animator animator1;
+
     public Rigidbody hips;
     
     public GameObject  target;
@@ -40,6 +42,7 @@ private Vector3 targetPosition;
     public bool toTarget = true;
     public int csacsiNumber = 1;
     
+    [SerializeField] private AudioClip audioClip;
     enum State 
     {
     calm,
@@ -66,8 +69,11 @@ private Vector3 targetPosition;
     }
     void Start()
     {
+        SoundFXManager.instance.PlaySoundFXClip(audioClip,transform, 5f);
         csacsiState = State.calm;
         animator.SetBool("isWlak", true);
+        animator1.SetBool("isWlak", true);
+
         hips = GetComponent<Rigidbody>();
     }
 
@@ -124,7 +130,9 @@ private Vector3 targetPosition;
     if (csacsiState == State.calm)
     {
         
-        animator.SetBool("isWlak", true);
+        animator.SetBool("isWlak", false);
+        animator1.SetBool("isWlak", false);
+
         if (crowdDistance < fleeRadius)
         {
             csacsiState = State.scared;
@@ -135,7 +143,9 @@ private Vector3 targetPosition;
     else if (csacsiState == State.scared)
     {
         
-        animator.SetBool("isWlak", false);
+        animator.SetBool("isWlak", true);
+        animator1.SetBool("isWlak", true);
+
         if (crowdDistance > fleeRadius)
         {
             csacsiState = State.calm;

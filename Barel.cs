@@ -1,25 +1,67 @@
+using System.Collections;
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class Barel : MonoBehaviour
 {
     [SerializeField] ParticleSystem expolison;
+    [SerializeField] hordo pHordo;
+        [SerializeField] LayerMask ground;
+        [SerializeField] private AudioClip audioClip;
 
-[SerializeField] private BlowUpDetector explosionTrigger; 
-    bool isFlying = false;
 
-    void Start()
+    public List<PlayerController> inside = new List<PlayerController>();
+    bool isGrounded;
+    bool blowUpStarted = false;
+
+
+    void Update()
+    {   
+
+        CheckGround();
+
+        if (!isGrounded && !blowUpStarted)
+        {
+            blowUpStarted = true;
+            StartCoroutine(BlowUpTimer());
+        }
+    }
+
+    IEnumerator BlowUpTimer(){
+    yield return new WaitForSeconds(3f);
+    BlowUp();
+    }
+
+
+    void OnDrawGizmosSelected()
     {
-        isFlying = false;
+        Gizmos.color = isGrounded ? Color.green : Color.red;
+        Gizmos.DrawLine(
+            transform.position,
+            transform.position + Vector3.down * 5.0f
+        );
+    }
+        private void CheckGround()
+    {
+        isGrounded = Physics.Raycast(
+            transform.position,
+            Vector3.down,
+            5.0f,
+            ground
+        );
     }
 
     public void BlowUp()
     {
+
         expolison.Play();
-        gameObject.GetComponent<CanvasGroup>().alpha = 0f;
-        Destroy(gameObject,2f);
-        if(explosionTrigger.inside.Count == 0)return;
-        foreach (PlayerController figura in explosionTrigger.inside)
+        gameObject.transform.parent.GetComponent<CanvasGroup>().alpha = 0f;
+        gameObject.transform.parent.GetComponent<Rigidbody>().isKinematic = true;
+        pHordo.BlowUp();
+        SoundFXManager.instance.PlaySoundFXClip(audioClip,transform, 10f);
+        if(inside.Count == 0)return;
+        foreach (PlayerController figura in inside)
         {
             if(figura == null)return;
             Rigidbody hips =  figura.GetComponent<Rigidbody>();
@@ -30,19 +72,25 @@ public class Barel : MonoBehaviour
 
     }
 
+    
+
+
     void OnTriggerEnter(Collider other)
-    {   
-        if (isFlying && other.CompareTag("ground"))
+    {
+        
+        if (other.CompareTag("blue")||other.CompareTag("red"))
         {
-            BlowUp();
+        inside.Add(other.GetComponent<PlayerController>());
         }
     }
 
-        void OnTriggerExit(Collider other)
+    void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("ground"))
+            
+        if (other.CompareTag("blue")||other.CompareTag("red"))
         {
-            isFlying = true;
+        inside.Remove(other.GetComponentInChildren<PlayerController>());
+
         }
     }
 

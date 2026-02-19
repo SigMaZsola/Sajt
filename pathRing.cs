@@ -9,33 +9,66 @@ public class pathRing : MonoBehaviour
     public Image blueRdProgressTracker;
     public Animator animator;
     public Transform mesh;
-    
+    private float previousFillAmount = 0f;
     enum Csacsitype {
         red,
         blue,
         none
     }
     List<Csacsitype> objectsInArea = new List<Csacsitype>();
+        [SerializeField] private AudioClip audioClip;
+    private bool canPlayedSound = false;
+
     void Start()
     {
        blueRdProgressTracker.fillAmount = 0.5f;
     }
 
 
-    void Update()
+
+
+private bool hasPlayedZero = false;
+private bool hasPlayedOne = false;
+
+void Update()
+{
+    updateBar();
+    CheckPlaySound();
+
+    if (blueRdProgressTracker.fillAmount <= 0.001f || 
+        blueRdProgressTracker.fillAmount >= 0.999f)
     {
-        updateBar();
-        if (blueRdProgressTracker.fillAmount == 1 || blueRdProgressTracker.fillAmount == 0)
-        {
-            animator.SetBool("isErect", true);
-            loadTexture();
-        }
-        else
-        {
-            animator.SetBool("isErect", false);
-            loadTexture();
-        }
+        animator.SetBool("isErect", true);
+        loadTexture();
     }
+    else
+    {
+        animator.SetBool("isErect", false);
+        loadTexture();
+    }
+}
+
+void CheckPlaySound()
+{
+
+    if (blueRdProgressTracker.fillAmount <= 0.001f && !hasPlayedZero)
+    {
+        SoundFXManager.instance.PlaySoundFXClip(audioClip, transform, 20f);
+        hasPlayedZero = true;
+        hasPlayedOne = false; 
+    }
+
+
+    if (blueRdProgressTracker.fillAmount >= 0.999f && !hasPlayedOne)
+    {
+        SoundFXManager.instance.PlaySoundFXClip(audioClip, transform, 20f);
+        hasPlayedOne = true;
+        hasPlayedZero = false; 
+    }
+}
+
+
+
 
     void updateBar()
     {
@@ -58,6 +91,13 @@ public class pathRing : MonoBehaviour
         }
     }
 
+
+    void PlaySound()
+    {
+        if(!canPlayedSound)return;
+        canPlayedSound = false;
+        SoundFXManager.instance.PlaySoundFXClip(audioClip,transform, 20f);
+    }
     void OnTriggerEnter(Collider other)
     {
         if (other.name == "BlueCsacsi")
