@@ -30,7 +30,7 @@ private Vector3 targetPosition;
     public float rayDistance = 0.3f;
     [SerializeField] LayerMask ground;
     [SerializeField] LayerMask obstacleLayer;
-
+    [SerializeField] csacsiBubi csBubi;
     private int pushCounter;
     public bool isGrounded;
     private bool isBumped;
@@ -79,6 +79,7 @@ private Vector3 targetPosition;
 
     void Update()
     {
+        if(hips.transform.position.y < -20){hips.transform.position = new Vector3(0,0,0);}
         var crowds = FindObjectsByType<CrowdController>(FindObjectsSortMode.None);
         foreach (var c in crowds)
         {
@@ -122,23 +123,29 @@ private Vector3 targetPosition;
     
     if (csacsiState == State.calm)
     {
+        
         animator.SetBool("isWlak", true);
         if (crowdDistance < fleeRadius)
         {
             csacsiState = State.scared;
+            csBubi.AppearBubi(csacsiState.ToString());
+            csBubi.canShow = true;
         }
     }
     else if (csacsiState == State.scared)
     {
+        
         animator.SetBool("isWlak", false);
         if (crowdDistance > fleeRadius)
         {
             csacsiState = State.calm;
+            csBubi.AppearBubi(csacsiState.ToString());
+            csBubi.canShow = true;
         }
     }
     else if (csacsiState == State.idle)
     {
-
+        
         if (crowdDistance > fleeRadius)
         {
             StartCoroutine(ChangeToCalm());
@@ -150,6 +157,8 @@ IEnumerator ChangeToCalm()
 {
     yield return new WaitForSeconds(1f);
     csacsiState = State.calm;
+    csBubi.AppearBubi(csacsiState.ToString());
+    csBubi.canShow = true;
 }
 
 private void MoveToTarget()

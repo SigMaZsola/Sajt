@@ -4,7 +4,7 @@ using UnityEngine;
 public class RingCounter : MonoBehaviour
 {
     public GameOverTimer gTimer;
-    bool over = false;
+    public bool over = false;
     int blueRingCount;
     int redRingCount;
 
@@ -13,7 +13,9 @@ public class RingCounter : MonoBehaviour
 
     public string determineWinner()
     {
+        
         string result = "";
+
         if (blueRingCount < redRingCount)
         {
             result = "RED IS THE WINNER";
@@ -35,8 +37,8 @@ public class RingCounter : MonoBehaviour
     void startCount()
     {
         if(over)return;
-        over = true;
-        Debug.Log("számol");
+        
+
         foreach(pathRing pr in ringCounter.GetComponentsInChildren<pathRing>())
         {
             if(pr.blueRdProgressTracker.fillAmount == 0)
@@ -47,6 +49,7 @@ public class RingCounter : MonoBehaviour
                 redRingCount ++;
             }
         }
+        over = true;
     }
 
 }

@@ -4,6 +4,7 @@ using System.Collections;
 
 public class TitleScreen : MonoBehaviour
 {
+    public int scene = 0;
     void Start()
     {
         StartCoroutine(LoadAfterDelay());
@@ -11,7 +12,7 @@ public class TitleScreen : MonoBehaviour
 
     IEnumerator LoadAfterDelay()
     {
-        yield return new WaitForSeconds(1f);
-        SceneManager.LoadScene(1);
+        yield return new WaitForSeconds(3f);
+        SceneManager.LoadScene(scene);
     }
 }

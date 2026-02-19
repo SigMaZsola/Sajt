@@ -6,9 +6,12 @@ public class GameOverTimer : MonoBehaviour
     public float time = 600;
     public float endTime = 0;
     [SerializeField] TMP_Text timerText;
-
+    public bool canStart = false;
+    [SerializeField] StartTimer startTimer;
     void Update()
     {
+        if(startTimer.timerText.text == "GO!")canStart = true;
+        if(!canStart)return;
         if (time < endTime)
         {
             time -= 0;
